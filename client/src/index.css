@@ -72,7 +72,7 @@ img { max-width: 100%; }
 .ham span { width: 20px; height: 2px; background: var(--tx); border-radius: 2px; display: block; transition: all .2s; }
 
 /* MAIN LAYOUT */
-.layout-root { display: flex; height: 100vh; overflow: hidden; }
+.layout-root {height: 100vh; overflow: hidden; }
 .main { margin-left: var(--sw); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
 /* TOPBAR */
