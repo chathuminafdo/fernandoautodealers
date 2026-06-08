@@ -3613,10 +3613,10 @@ Content-Type: `+u.contentType+`\r
     margin-bottom: 32px;
   }
   .logo-img {
-    width: 160px;
+    width: 140px;
     height: auto;
     display: block;
-    margin: 0 auto 14px;
+    margin: 0 auto 12px;
   }
   .brand {
     text-align: center;
@@ -3792,16 +3792,21 @@ Content-Type: `+u.contentType+`\r
     html, body { margin: 0; padding: 0; background: white; }
     .pbar { display: none !important; }
     .invoice {
-      box-shadow: none; margin: 0; padding: 0;
-      width: 100%; height: auto;
-      min-height: calc(297mm - 24mm);
+      box-shadow: none; margin: 0;
+      width: 210mm; min-height: 297mm;
+      padding: 14mm 18mm 12mm;
     }
-    .header    { margin-bottom: 28px; }
-    .pill-wrap { margin: 20px 0 44px; }
-    .sig-row   { margin: 0 0 20px; page-break-inside: avoid; break-inside: avoid; }
-    .footer    { page-break-inside: avoid; break-inside: avoid; }
-    .fitem     { page-break-inside: avoid; break-inside: avoid; }
-    @page { size: A4; margin: 12mm 16mm; }
+    .header        { margin-bottom: 22px; }
+    .top-row       { padding-bottom: 10px; margin-bottom: 10px; }
+    .section-label { padding-bottom: 8px;  margin-bottom: 10px; }
+    .desc          { padding-bottom: 10px; margin-bottom: 10px; }
+    .lease-block   { padding-bottom: 8px;  margin-bottom: 10px; }
+    .adv-prices    { padding-bottom: 8px;  margin-bottom: 8px;  }
+    .pill-wrap     { margin: 20px 0 60px; }
+    .sig-row       { margin: 0 0 16px; page-break-inside: avoid; break-inside: avoid; }
+    .footer        { page-break-inside: avoid; break-inside: avoid; }
+    .fitem         { page-break-inside: avoid; break-inside: avoid; }
+    @page { size: A4; margin: 0; }
   }
 `;function SI(t,{vehicle:e,sale:r,buyer:n},s){const i=t==="advance",a=i?"ADVANCED INVOICE":"INVOICE",o=i&&r.advance_date||r.sell_date,u=[[e.brand,e.model,e.year].filter(Boolean).join(" "),e.chassis?`chassis number -[${e.chassis}]`:null,e.engine_num?`Engine number - [ ${e.engine_num} ]`:null,e.model_code?`Model - [${e.model_code} ]`:null,e.origin?`Country of origin - [ ${e.origin} ]`:null,e.fuel_type?`Fuel Type- ${e.fuel_type}`:null].filter(Boolean).join("<br>"),f=ql(r.lease_amount),d=ql(r.cash_amount),p=ql(r.vehicle_price),g=ql(r.rmv_fee),x=ql(r.sell_price),m=uw(r.advance_amount),_=uw(r.sell_price),T=f||d?`
     <div class="lease-block">
