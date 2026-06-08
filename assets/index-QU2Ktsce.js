@@ -3613,10 +3613,10 @@ Content-Type: `+u.contentType+`\r
     margin-bottom: 32px;
   }
   .logo-img {
-    width: 140px;
+    width: 160px;
     height: auto;
     display: block;
-    margin: 0 auto 12px;
+    margin: 0 auto 14px;
   }
   .brand {
     text-align: center;
@@ -3802,7 +3802,7 @@ Content-Type: `+u.contentType+`\r
     .desc          { padding-bottom: 10px; margin-bottom: 10px; }
     .lease-block   { padding-bottom: 8px;  margin-bottom: 10px; }
     .adv-prices    { padding-bottom: 8px;  margin-bottom: 8px;  }
-    .pill-wrap     { margin: 20px 0 60px; }
+    .pill-wrap     { margin: 20px 0 40px; }
     .sig-row       { margin: 0 0 16px; page-break-inside: avoid; break-inside: avoid; }
     .footer        { page-break-inside: avoid; break-inside: avoid; }
     .fitem         { page-break-inside: avoid; break-inside: avoid; }
