@@ -249,16 +249,21 @@ const CSS = `
     html, body { margin: 0; padding: 0; background: white; }
     .pbar { display: none !important; }
     .invoice {
-      box-shadow: none; margin: 0; padding: 0;
-      width: 100%; height: auto;
-      min-height: calc(297mm - 24mm);
+      box-shadow: none; margin: 0;
+      width: 210mm; min-height: 297mm;
+      padding: 14mm 18mm 12mm;
     }
-    .header    { margin-bottom: 28px; }
-    .pill-wrap { margin: 20px 0 44px; }
-    .sig-row   { margin: 0 0 20px; page-break-inside: avoid; break-inside: avoid; }
-    .footer    { page-break-inside: avoid; break-inside: avoid; }
-    .fitem     { page-break-inside: avoid; break-inside: avoid; }
-    @page { size: A4; margin: 12mm 16mm; }
+    .header        { margin-bottom: 22px; }
+    .top-row       { padding-bottom: 10px; margin-bottom: 10px; }
+    .section-label { padding-bottom: 8px;  margin-bottom: 10px; }
+    .desc          { padding-bottom: 10px; margin-bottom: 10px; }
+    .lease-block   { padding-bottom: 8px;  margin-bottom: 10px; }
+    .adv-prices    { padding-bottom: 8px;  margin-bottom: 8px;  }
+    .pill-wrap     { margin: 20px 0 40px; }
+    .sig-row       { margin: 0 0 16px; page-break-inside: avoid; break-inside: avoid; }
+    .footer        { page-break-inside: avoid; break-inside: avoid; }
+    .fitem         { page-break-inside: avoid; break-inside: avoid; }
+    @page { size: A4; margin: 0; }
   }
 `;
 
