@@ -255,7 +255,7 @@ function ExpenseForm({ editing, onSave, onCancel }) {
 
 // ---- Main Modal ----
 
-export default function VehicleLedgerModal({ open, vehicle, onClose, showToast }) {
+export default function VehicleLedgerModal({ open, vehicle, onClose, showToast, onCostUpdated }) {
   const [expenses,  setExpenses]  = useState([]);
   const [loading,   setLoading]   = useState(false);
   const [showForm,  setShowForm]  = useState(false);
@@ -269,6 +269,7 @@ export default function VehicleLedgerModal({ open, vehicle, onClose, showToast }
       setExpenses(data);
       const total = data.reduce((s, e) => s + (Number(e.lkrAmount) || 0), 0);
       await updateVehicleCost(vehicle.id, total || null);
+      onCostUpdated?.(vehicle.id, total || null);
     } catch {
       showToast('Failed to load ledger', 'err');
     } finally {

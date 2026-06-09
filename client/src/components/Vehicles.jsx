@@ -680,6 +680,11 @@ export default function Vehicles({ showToast, defaultStatus = '' }) {
         vehicle={ledgerVehicle}
         onClose={() => setLedgerOpen(false)}
         showToast={showToast}
+        onCostUpdated={(vehicleId, newCost) =>
+          setVehicles(prev => prev.map(v =>
+            v.id === vehicleId ? { ...v, cost: newCost } : v
+          ))
+        }
       />
     </>
   );
