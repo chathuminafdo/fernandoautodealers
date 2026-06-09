@@ -210,6 +210,12 @@ const normalizeDate = (v) => {
   return s;
 };
 
+// ---- Cost sync ----
+
+export const updateVehicleCost = async (vehicleId, cost) => {
+  await updateDoc(doc(db, COL, vehicleId), { cost: cost || null });
+};
+
 // ---- Expense Ledger (sub-collection) ----
 
 export const getExpenses = async (vehicleId) => {

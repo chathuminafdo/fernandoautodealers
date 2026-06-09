@@ -115,13 +115,6 @@ export default function VehicleModal({ open, vehicle, onClose, onSaved, showToas
 
   const set = (k, v) => setForm(f => {
     const nf = { ...f, [k]: v };
-    const tt = parseFloat(nf.tt_lkr) || 0;
-    const lc = parseFloat(nf.lc_lkr) || 0;
-    const du = parseFloat(nf.duty)   || 0;
-    const ot = parseFloat(nf.others) || 0;
-    if (['tt_lkr', 'lc_lkr', 'duty', 'others'].includes(k) && (tt || lc || du || ot)) {
-      nf.cost = (tt + lc + du + ot).toFixed(2);
-    }
     if (k !== 'income') {
       const cost = parseFloat(nf.cost)       || 0;
       const sell = parseFloat(nf.sell_price) || 0;
@@ -252,22 +245,6 @@ export default function VehicleModal({ open, vehicle, onClose, onSaved, showToas
               <input value={form.lc_num} onChange={e => set('lc_num', e.target.value)} placeholder="DCSPABC…" />
             </div>
             <div className="form-row">
-              <label>TT (LKR)</label>
-              <input type="number" value={form.tt_lkr} onChange={e => set('tt_lkr', e.target.value)} placeholder="0" />
-            </div>
-            <div className="form-row">
-              <label>LC (LKR)</label>
-              <input type="number" value={form.lc_lkr} onChange={e => set('lc_lkr', e.target.value)} placeholder="0" />
-            </div>
-            <div className="form-row">
-              <label>Duty (LKR)</label>
-              <input type="number" value={form.duty} onChange={e => set('duty', e.target.value)} placeholder="0" />
-            </div>
-            <div className="form-row">
-              <label>Others (LKR)</label>
-              <input type="number" value={form.others} onChange={e => set('others', e.target.value)} placeholder="0" />
-            </div>
-            <div className="form-row">
               <label>CUSDEC</label>
               <input value={form.cusdec} onChange={e => set('cusdec', e.target.value)} placeholder="HBIM1|…" />
             </div>
@@ -276,8 +253,14 @@ export default function VehicleModal({ open, vehicle, onClose, onSaved, showToas
               <input type="date" value={form.clear_date} onChange={e => set('clear_date', e.target.value)} />
             </div>
             <div className="form-row">
-              <label>Cost (LKR) <small style={{ color: 'var(--g)' }}>(auto)</small></label>
-              <input type="number" value={form.cost} onChange={e => set('cost', e.target.value)} placeholder="TT+LC+Duty+Others" />
+              <label>Cost (LKR) <small style={{ color: 'var(--g)' }}>(from ledger)</small></label>
+              <div style={{
+                padding: '9px 11px', background: 'var(--bg3)', border: '1px solid var(--br)',
+                borderRadius: 7, fontSize: '.79rem', minHeight: 38, display: 'flex', alignItems: 'center',
+                color: form.cost ? 'var(--tx)' : 'var(--t3)', fontFamily: "'Josefin Sans',sans-serif",
+              }}>
+                {form.cost ? `LKR ${Number(form.cost).toLocaleString('en-LK', { maximumFractionDigits: 0 })}` : 'Add entries via ledger (  icon)'}
+              </div>
             </div>
             <div className="form-row">
               <label>Sell Date</label>
@@ -375,15 +358,11 @@ export default function VehicleModal({ open, vehicle, onClose, onSaved, showToas
             <div style={{ background: 'var(--bg3)', border: '1px solid var(--br)', borderRadius: 10, padding: '10px 14px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0 24px' }}>
                 <div>
-                  <InfoRow label="LC Date"      value={fmtD(form.lc_date)} />
-                  <InfoRow label="LC Number"    value={form.lc_num} />
-                  <InfoRow label="TT (LKR)"     value={form.tt_lkr ? `LKR ${fmt(form.tt_lkr)}` : null} />
-                  <InfoRow label="LC (LKR)"     value={form.lc_lkr ? `LKR ${fmt(form.lc_lkr)}` : null} />
+                  <InfoRow label="LC Date"       value={fmtD(form.lc_date)} />
+                  <InfoRow label="LC Number"     value={form.lc_num} />
+                  <InfoRow label="CUSDEC"        value={form.cusdec} />
                 </div>
                 <div>
-                  <InfoRow label="Duty (LKR)"   value={form.duty   ? `LKR ${fmt(form.duty)}`   : null} />
-                  <InfoRow label="Others (LKR)" value={form.others ? `LKR ${fmt(form.others)}` : null} />
-                  <InfoRow label="CUSDEC"        value={form.cusdec} />
                   <InfoRow label="Clearing Date" value={fmtD(form.clear_date)} />
                 </div>
               </div>

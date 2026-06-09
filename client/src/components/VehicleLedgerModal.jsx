@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { getExpenses, addExpense, updateExpense, deleteExpense } from '../services/vehicleService';
+import { getExpenses, addExpense, updateExpense, deleteExpense, updateVehicleCost } from '../services/vehicleService';
 
 const fmt  = n => n == null ? '—' : Number(n).toLocaleString('en-LK', { maximumFractionDigits: 0 });
 const fmtD = d => {
@@ -265,7 +265,10 @@ export default function VehicleLedgerModal({ open, vehicle, onClose, showToast }
     if (!vehicle?.id) return;
     setLoading(true);
     try {
-      setExpenses(await getExpenses(vehicle.id));
+      const data = await getExpenses(vehicle.id);
+      setExpenses(data);
+      const total = data.reduce((s, e) => s + (Number(e.lkrAmount) || 0), 0);
+      await updateVehicleCost(vehicle.id, total || null);
     } catch {
       showToast('Failed to load ledger', 'err');
     } finally {
