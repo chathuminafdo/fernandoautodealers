@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { getVehicles, deleteVehicle, sellVehicle, completeAdvanceSale, updateVehicle, bulkCreateVehicles } from '../services/vehicleService';
 import VehicleModal from './VehicleModal';
+import VehicleLedgerModal from './VehicleLedgerModal';
 import { printAdvanceInvoice, printCustomerInvoice } from '../utils/invoicePrint';
 
 const fmt = n => n == null ? '—' : Number(n).toLocaleString('en-LK', { maximumFractionDigits: 0 });
@@ -446,6 +447,8 @@ export default function Vehicles({ showToast, defaultStatus = '' }) {
   const [arrOpen, setArrOpen] = useState(false);
   const [arrVehicle, setArrVehicle] = useState(null);
   const [importOpen, setImportOpen] = useState(false);
+  const [ledgerOpen, setLedgerOpen] = useState(false);
+  const [ledgerVehicle, setLedgerVehicle] = useState(null);
   const LIMIT = 20;
 
   const load = useCallback(async () => {
@@ -600,6 +603,14 @@ export default function Vehicles({ showToast, defaultStatus = '' }) {
                     <td style={{ fontSize: '.71rem' }}>{v.contact || '—'}</td>
                     <td style={{ whiteSpace: 'nowrap' }}>
                       <button className="ac" onClick={() => { setEditVehicle(v); setModalOpen(true); }} title="Edit"><i className="fa fa-pen" /></button>
+                      <button
+                        className="ac"
+                        onClick={() => { setLedgerVehicle(v); setLedgerOpen(true); }}
+                        title="Financial Ledger"
+                        style={{ color: '#8b5cf6' }}
+                      >
+                        <i className="fa fa-list-ul" />
+                      </button>
                       {v.status === 'IN HAND' && v.payment_type !== 'ADVANCE' && (
                         <button className="ac sell" onClick={() => { setQsVehicle(v); setQsCost(finalCost); setQsOpen(true); }} title="Sell"><i className="fa fa-dollar-sign" /></button>
                       )}
@@ -662,6 +673,12 @@ export default function Vehicles({ showToast, defaultStatus = '' }) {
         open={importOpen}
         onClose={() => setImportOpen(false)}
         onDone={load}
+        showToast={showToast}
+      />
+      <VehicleLedgerModal
+        open={ledgerOpen}
+        vehicle={ledgerVehicle}
+        onClose={() => setLedgerOpen(false)}
         showToast={showToast}
       />
     </>

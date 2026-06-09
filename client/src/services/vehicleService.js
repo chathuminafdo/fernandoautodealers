@@ -210,6 +210,30 @@ const normalizeDate = (v) => {
   return s;
 };
 
+// ---- Expense Ledger (sub-collection) ----
+
+export const getExpenses = async (vehicleId) => {
+  const q = query(collection(db, COL, vehicleId, 'expenses'), orderBy('date', 'asc'));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+};
+
+export const addExpense = async (vehicleId, data) => {
+  const docRef = await addDoc(collection(db, COL, vehicleId, 'expenses'), {
+    ...data,
+    createdAt: serverTimestamp(),
+  });
+  return docRef.id;
+};
+
+export const updateExpense = async (vehicleId, expenseId, updates) => {
+  await updateDoc(doc(db, COL, vehicleId, 'expenses', expenseId), updates);
+};
+
+export const deleteExpense = async (vehicleId, expenseId) => {
+  await deleteDoc(doc(db, COL, vehicleId, 'expenses', expenseId));
+};
+
 export const bulkCreateVehicles = async (rows, onProgress) => {
   let nextNo = await getNextNo();
   let done = 0;
