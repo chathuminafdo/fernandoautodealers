@@ -39,7 +39,7 @@ const TITLES = {
 function Clock({ tz, label, flag }) {
   const [time, setTime] = useState('--:--:--');
   useEffect(() => {
-    const tick = () => setTime(new Date().toLocaleTimeString('en-US', { timeZone: tz, hour12: false }));
+    const tick = () => setTime(new Date().toLocaleTimeString('en-US', { timeZone: tz, hour12: true }));
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
@@ -50,6 +50,29 @@ function Clock({ tz, label, flag }) {
       <div className="ck-info">
         <span className="ck-lbl">{label}</span>
         <span className="ck-val">{time}</span>
+      </div>
+    </div>
+  );
+}
+
+function ExchangeRate({ from, to, label, flag }) {
+  const [rate, setRate] = useState(null);
+  useEffect(() => {
+    const fetch_ = () =>
+      fetch(`https://open.er-api.com/v6/latest/${from}`)
+        .then(r => r.json())
+        .then(d => d.rates?.[to] && setRate(d.rates[to].toFixed(2)))
+        .catch(() => {});
+    fetch_();
+    const id = setInterval(fetch_, 5 * 60 * 1000);
+    return () => clearInterval(id);
+  }, [from, to]);
+  return (
+    <div className="ck-item">
+      <span className="ck-flag">{flag}</span>
+      <div className="ck-info">
+        <span className="ck-lbl">{label}</span>
+        <span className="ck-val">{rate ?? '---'}</span>
       </div>
     </div>
   );
@@ -144,6 +167,8 @@ export default function Layout() {
             <div className="clocks-bar">
               <Clock tz="Asia/Colombo" label="Sri Lanka" flag="🇱🇰" />
               <Clock tz="Asia/Tokyo" label="Japan" flag="🇯🇵" />
+              <ExchangeRate from="JPY" to="LKR" label="JPY → LKR" flag="💴" />
+              <ExchangeRate from="USD" to="LKR" label="USD → LKR" flag="💵" />
             </div>
             <span className="pill">ADMIN</span>
           </div>

@@ -18,7 +18,9 @@
       "Bash(npx tsc *)",
       "Bash(node -e \"const fs=require\\('fs'\\);const data=fs.readFileSync\\('client/src/assests/aboutaaa.png'\\);console.log\\('data:image/png;base64,'+data.toString\\('base64'\\)\\);\")",
       "Bash(node -e \"const fs=require\\('fs'\\);const data=fs.readFileSync\\('client/src/assests/aboutaaa.png'\\);const b64='data:image/png;base64,'+data.toString\\('base64'\\);fs.writeFileSync\\('logo_b64.txt',b64\\);console.log\\('size:',b64.length\\);\")",
-      "Bash(npx vite *)"
+      "Bash(npx vite *)",
+      "Bash(Get-ChildItem -Path \"d:\\\\react-app\" -Recurse -Depth 2 -Directory)",
+      "Bash(Select-Object -First 30)"
     ]
   }
 }

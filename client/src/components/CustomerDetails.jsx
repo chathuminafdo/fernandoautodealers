@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getVehicles, updateVehicle } from '../services/vehicleService';
+import { printAdvanceInvoice, printCustomerInvoice } from '../utils/invoicePrint';
 
 const fmt  = n => n == null ? '—' : Number(n).toLocaleString('en-LK', { maximumFractionDigits: 0 });
 const fmtD = d => { if (!d) return '—'; const s = String(d).split('T')[0]; const [y, m, dy] = s.split('-'); return `${dy}/${m}/${y}`; };
@@ -149,7 +150,7 @@ export default function CustomerDetails({ showToast }) {
           map[key].total_spent  += parseFloat(v.sell_price) || 0;
           map[key].total_income += parseFloat(v.income)     || 0;
         });
-        setCustomers(Object.values(map).sort((a, b) => b.vehicles.length - a.vehicles.length || b.total_spent - a.total_spent));
+        setCustomers(Object.values(map).sort((a, b) => Math.min(...a.vehicles.map(v => v.no)) - Math.min(...b.vehicles.map(v => v.no))));
       })
       .catch(() => showToast('Failed to load customers', 'err'))
       .finally(() => setLoading(false));
@@ -211,7 +212,7 @@ export default function CustomerDetails({ showToast }) {
                 <React.Fragment key={c.contact}>
                   {/* ── Customer summary row ── */}
                   <tr style={{ cursor: 'pointer' }} onClick={() => toggle(c.contact)}>
-                    <td><strong>{i + 1}</strong></td>
+                    <td><strong>{Math.min(...c.vehicles.map(v => v.no))}</strong></td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <div style={{
@@ -325,20 +326,48 @@ export default function CustomerDetails({ showToast }) {
                           </div>
                         </td>
 
-                        {/* Edit button */}
+                        {/* Invoice + Edit buttons */}
                         <td style={{ textAlign: 'right', paddingRight: 8 }}>
-                          <button
-                            onClick={e => { e.stopPropagation(); setEditVehicle(v); }}
-                            title="Edit customer / registration"
-                            style={{
-                              display: 'inline-flex', alignItems: 'center', gap: 5,
-                              padding: '4px 10px', borderRadius: 7, fontSize: '.68rem', fontWeight: 700,
-                              background: 'rgba(96,165,250,.1)', color: '#93c5fd',
-                              border: '1px solid rgba(96,165,250,.25)', cursor: 'pointer',
-                            }}
-                          >
-                            <i className="fa fa-pen" style={{ fontSize: '.6rem' }} /> Edit
-                          </button>
+                          <div style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+                            {v.payment_type === 'ADVANCE' && (
+                              <button
+                                onClick={e => { e.stopPropagation(); printAdvanceInvoice({ vehicle: { ...v }, sale: { sell_price: v.sell_price, sell_date: v.sell_date, advance_date: v.advance_date, advance_amount: v.advance_amount, vehicle_price: v.vehicle_price, rmv_fee: v.rmv_fee, lease_amount: v.lease_amount, cash_amount: v.cash_amount }, buyer: { customer_name: v.customer_name, contact: v.contact, buyer_address: v.buyer_address } }); }}
+                                title="Advance Invoice"
+                                style={{
+                                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                                  padding: '4px 10px', borderRadius: 7, fontSize: '.68rem', fontWeight: 700,
+                                  background: 'rgba(251,146,60,.1)', color: '#fb923c',
+                                  border: '1px solid rgba(251,146,60,.25)', cursor: 'pointer',
+                                }}
+                              >
+                                <i className="fa fa-file-invoice" style={{ fontSize: '.6rem' }} /> Advance
+                              </button>
+                            )}
+                            <button
+                              onClick={e => { e.stopPropagation(); printCustomerInvoice({ vehicle: { ...v }, sale: { sell_price: v.sell_price, sell_date: v.sell_date, advance_date: v.advance_date, advance_amount: v.advance_amount, vehicle_price: v.vehicle_price, rmv_fee: v.rmv_fee, lease_amount: v.lease_amount, cash_amount: v.cash_amount }, buyer: { customer_name: v.customer_name, contact: v.contact, buyer_address: v.buyer_address } }); }}
+                              title="Final Invoice"
+                              style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 5,
+                                padding: '4px 10px', borderRadius: 7, fontSize: '.68rem', fontWeight: 700,
+                                background: 'rgba(74,222,128,.1)', color: '#4ade80',
+                                border: '1px solid rgba(74,222,128,.25)', cursor: 'pointer',
+                              }}
+                            >
+                              <i className="fa fa-file-invoice-dollar" style={{ fontSize: '.6rem' }} /> Final
+                            </button>
+                            <button
+                              onClick={e => { e.stopPropagation(); setEditVehicle(v); }}
+                              title="Edit customer / registration"
+                              style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 5,
+                                padding: '4px 10px', borderRadius: 7, fontSize: '.68rem', fontWeight: 700,
+                                background: 'rgba(96,165,250,.1)', color: '#93c5fd',
+                                border: '1px solid rgba(96,165,250,.25)', cursor: 'pointer',
+                              }}
+                            >
+                              <i className="fa fa-pen" style={{ fontSize: '.6rem' }} /> Edit
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
