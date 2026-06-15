@@ -559,17 +559,15 @@ export default function Vehicles({ showToast, defaultStatus = '' }) {
                 <th><SortBtn col="brand" /> Brand</th>
                 <th>Model</th><th>Chassis</th><th>Colour</th>
                 <th><SortBtn col="cost" /> Cost</th>
-                <th><SortBtn col="sell_price" /> Sell Price</th>
-                <th><SortBtn col="income" /> Income</th>
-                <th><SortBtn col="sell_date" /> Sell Date</th>
-                <th>Contact</th><th>Actions</th>
+                {defaultStatus !== 'ON THE WAY' && <><th><SortBtn col="sell_price" /> Sell Price</th><th><SortBtn col="income" /> Income</th><th><SortBtn col="sell_date" /> Sell Date</th><th>Contact</th></>}
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan="14" className="loading"><span className="spin" />Loading…</td></tr>
+                <tr><td colSpan={defaultStatus === 'ON THE WAY' ? 10 : 14} className="loading"><span className="spin" />Loading…</td></tr>
               ) : vehicles.length === 0 ? (
-                <tr><td colSpan="14" className="empty">No vehicles found</td></tr>
+                <tr><td colSpan={defaultStatus === 'ON THE WAY' ? 10 : 14} className="empty">No vehicles found</td></tr>
               ) : vehicles.map(v => {
                 const finalCost = fc(v);
                 const inc = v.income != null ? parseFloat(v.income) : null;
@@ -591,16 +589,18 @@ export default function Vehicles({ showToast, defaultStatus = '' }) {
                     <td style={{ fontSize: '.7rem', color: 'var(--t3)' }}>{v.chassis || '—'}</td>
                     <td>{v.colour || '—'}</td>
                     <td className="amt">{fmt(v.cost)}</td>
-                    <td className="amt">{fmt(v.sell_price)}</td>
-                    <td>
-                      {inc == null ? '—' : (
-                        <span className={`badge ${inc < 0 ? 'b-loss' : 'b-profit'}`}>
-                          {inc < 0 ? '− ' : '+ '}{fmt(Math.abs(inc))}
-                        </span>
-                      )}
-                    </td>
-                    <td>{fmtD(v.sell_date)}</td>
-                    <td style={{ fontSize: '.71rem' }}>{v.contact || '—'}</td>
+                    {defaultStatus !== 'ON THE WAY' && <>
+                      <td className="amt">{fmt(v.sell_price)}</td>
+                      <td>
+                        {inc == null ? '—' : (
+                          <span className={`badge ${inc < 0 ? 'b-loss' : 'b-profit'}`}>
+                            {inc < 0 ? '− ' : '+ '}{fmt(Math.abs(inc))}
+                          </span>
+                        )}
+                      </td>
+                      <td>{fmtD(v.sell_date)}</td>
+                      <td style={{ fontSize: '.71rem' }}>{v.contact || '—'}</td>
+                    </>}
                     <td style={{ whiteSpace: 'nowrap' }}>
                       <button className="ac" onClick={() => { setEditVehicle(v); setModalOpen(true); }} title="Edit"><i className="fa fa-pen" /></button>
                       <button
