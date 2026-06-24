@@ -23,6 +23,7 @@ function SellModal({ open, vehicle, finalCost, onClose, onDone, showToast }) {
   const [cashAmt, setCashAmt]         = useState('');
   const [regStatus, setRegStatus]     = useState('UNREGISTERED');
   const [regNum, setRegNum]           = useState('');
+  const [staff, setStaff]             = useState('');
   const [saving, setSaving]           = useState(false);
 
   const inc = sell && finalCost ? parseFloat(sell) - finalCost : null;
@@ -32,7 +33,7 @@ function SellModal({ open, vehicle, finalCost, onClose, onDone, showToast }) {
     setCustomerName(''); setContact(''); setBuyerAddress('');
     setAdvanceAmt(''); setVehiclePrice(''); setRmvFee('');
     setLeaseAmt(''); setCashAmt('');
-    setRegStatus('UNREGISTERED'); setRegNum('');
+    setRegStatus('UNREGISTERED'); setRegNum(''); setStaff('');
   };
 
   useEffect(() => { if (open) reset(); }, [open, vehicle?.id]);
@@ -52,6 +53,7 @@ function SellModal({ open, vehicle, finalCost, onClose, onDone, showToast }) {
         buyer_address: buyerAddress,
         vehicle_price: vehiclePrice, rmv_fee: rmvFee,
         lease_amount: leaseAmt, cash_amount: cashAmt,
+        staff,
       });
 
       const invoiceData = {
@@ -141,6 +143,10 @@ function SellModal({ open, vehicle, finalCost, onClose, onDone, showToast }) {
 
         {/* Buyer details */}
         <div className="sell-section-hdr">Buyer Details</div>
+        <div className="form-row">
+          <label>Handled By (Staff)</label>
+          <input value={staff} onChange={e => setStaff(e.target.value)} placeholder="Sales person name" />
+        </div>
         <div className="form-row">
           <label>Customer Name {payType === 'ADVANCE' ? '*' : ''}</label>
           <input value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder="Full name of buyer" />

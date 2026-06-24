@@ -1,7 +1,7 @@
 import { db, storage } from '../firebase';
 import {
   collection, addDoc, getDocs, getDoc, doc,
-  updateDoc, deleteDoc, query, orderBy, serverTimestamp
+  updateDoc, deleteDoc, query, orderBy, where, serverTimestamp
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
@@ -76,10 +76,18 @@ const basePayload = (data) => {
     lease_amount: toNum(data.lease_amount),
     cash_amount: toNum(data.cash_amount),
     notes: data.notes || null,
+    staff: data.staff || null,
   };
 };
 
 export const createVehicle = async (data, lcPdfFile = null, cusdecPdfFile = null) => {
+  if (data.chassis) {
+    const dupSnap = await getDocs(query(collection(db, COL), where('chassis', '==', data.chassis)));
+    if (!dupSnap.empty) {
+      const ex = dupSnap.docs[0].data();
+      throw new Error(`Chassis ${data.chassis} already exists — Vehicle #${ex.no} (${ex.brand} ${ex.model})`);
+    }
+  }
   const no = await getNextNo();
   const docRef = await addDoc(collection(db, COL), {
     no,
@@ -111,6 +119,7 @@ export const sellVehicle = async (id, {
   sell_price, sell_date, contact, customer_name, reg_status, reg_num,
   payment_type, advance_amount, advance_date,
   buyer_address, vehicle_price, rmv_fee, lease_amount, cash_amount,
+  staff,
 }) => {
   const vehicle = await getVehicle(id);
   if (!vehicle) throw new Error('Vehicle not found');
@@ -139,6 +148,7 @@ export const sellVehicle = async (id, {
     rmv_fee: parseFloat(rmv_fee) || null,
     lease_amount: parseFloat(lease_amount) || null,
     cash_amount: parseFloat(cash_amount) || null,
+    staff: staff || null,
   };
 
   if (isAdvance) {

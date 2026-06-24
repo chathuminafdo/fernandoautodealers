@@ -36,10 +36,10 @@ export default function ProfitReport({ showToast }) {
   );
 
   const exportXLSX = () => {
-    const header = ['#', 'Brand', 'Model', 'Type', 'Chassis', 'Cost (LKR)', 'Sell Price (LKR)', 'Income (LKR)', 'Margin %', 'Sell Date', 'Contact'];
+    const header = ['#', 'Brand', 'Model', 'Type', 'Chassis', 'Cost (LKR)', 'Sell Price (LKR)', 'Income (LKR)', 'Margin %', 'Sell Date', 'Contact', 'Staff'];
     const data = rows.map(v => {
       const margin = v.cost && v.sell_price ? ((v.sell_price - v.cost) / v.sell_price * 100).toFixed(1) : '';
-      return [v.no, v.brand, v.model, v.type, v.chassis || '', Number(v.cost) || 0, Number(v.sell_price) || 0, Number(v.income) || 0, margin ? Number(margin) : '', fmtD(v.sell_date), v.contact || ''];
+      return [v.no, v.brand, v.model, v.type, v.chassis || '', Number(v.cost) || 0, Number(v.sell_price) || 0, Number(v.income) || 0, margin ? Number(margin) : '', fmtD(v.sell_date), v.contact || '', v.staff || ''];
     });
     if (totals) {
       data.push([]);
@@ -92,14 +92,14 @@ export default function ProfitReport({ showToast }) {
                 <th><SortBtn col="income" /> Income</th>
                 <th>Margin</th>
                 <th><SortBtn col="sell_date" /> Sell Date</th>
-                <th>Contact</th>
+                <th>Contact</th><th>Staff</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan="11" className="loading"><span className="spin" />Loading…</td></tr>
+                <tr><td colSpan="12" className="loading"><span className="spin" />Loading…</td></tr>
               ) : rows.length === 0 ? (
-                <tr><td colSpan="11" className="empty">No sold vehicles</td></tr>
+                <tr><td colSpan="12" className="empty">No sold vehicles</td></tr>
               ) : rows.map(v => {
                 const loss = parseFloat(v.income) < 0;
                 const pct = v.cost && v.sell_price ? ((v.sell_price - v.cost) / v.sell_price * 100).toFixed(1) + '%' : '—';
@@ -129,6 +129,7 @@ export default function ProfitReport({ showToast }) {
                     </td>
                     <td>{fmtD(v.sell_date)}</td>
                     <td style={{ fontSize: '.71rem' }}>{v.contact || '—'}</td>
+                    <td style={{ fontSize: '.71rem', color: 'var(--t2)' }}>{v.staff || '—'}</td>
                   </tr>
                 );
               })}

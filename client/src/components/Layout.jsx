@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getDashboardStats } from '../services/dashboardService';
@@ -6,6 +6,7 @@ import Dashboard from './Dashboard';
 import Vehicles from './Vehicles';
 import LCTracker from './LCTracker';
 import VehiclesAndProfit from './VehiclesAndProfit';
+import BusinessExpenses from './BusinessExpenses';
 import TaxManager from './TaxManager';
 import CustomerDetails from './CustomerDetails';
 import Documents from './Documents';
@@ -21,7 +22,8 @@ const SECTIONS = [
   { key: 'onway',         icon: 'fa-ship',             label: 'On The Way',       group: 'INVENTORY', badge: 'onway'  },
   { key: 'advance',       icon: 'fa-money-bill-wave',  label: 'Advance Paid',     group: 'INVENTORY' },
   { key: 'lc',            icon: 'fa-file-contract',    label: 'LC Tracker',       group: 'IMPORT'    },
-  { key: 'taxreport',     icon: 'fa-receipt',          label: 'VAT & SSCL',       group: 'FINANCE'   },
+  { key: 'taxreport',        icon: 'fa-receipt',               label: 'VAT & SSCL',        group: 'FINANCE' },
+  { key: 'businessexpenses', icon: 'fa-file-invoice-dollar',  label: 'Business Expenses', group: 'FINANCE' },
   { key: 'pricerequests', icon: 'fa-comments-dollar',  label: 'Price Requests',   group: 'CLIENTS',  badge: 'prs'   },
   { key: 'customers',     icon: 'fa-address-card',     label: 'Customers',        group: 'CLIENTS'   },
   { key: 'documents',     icon: 'fa-folder-open',      label: 'Documents',        group: 'CLIENTS'   },
@@ -36,7 +38,8 @@ const TITLES = {
   onway:         'On The Way',
   advance:       'Advance Paid',
   lc:            'LC Tracker',
-  taxreport:     'VAT & SSCL',
+  taxreport:        'VAT & SSCL',
+  businessexpenses: 'Business Expenses',
   pricerequests: 'Price Requests',
   customers:     'Customers',
   documents:     'Documents',
@@ -106,16 +109,28 @@ export default function Layout() {
   const [sidebarOpen, setSidebarOpen]   = useState(false);
   const [collapsed, setCollapsed]       = useState(false);
   const [badges, setBadges]             = useState({ inhand: 0, onway: 0, prs: 0 });
+  const [alerts, setAlerts]             = useState({ d60: 0, d90: 0, thisMonth: 0, target: null });
+  const [notifOpen, setNotifOpen]       = useState(false);
   const [toast, setToast]               = useState({ message: '', type: 'ok', visible: false });
+  const notifRef = useRef(null);
 
   const section = location.pathname.replace('/', '') || 'dashboard';
   const groups  = [...new Set(SECTIONS.map(s => s.group))];
 
   useEffect(() => {
     getDashboardStats()
-      .then(d => setBadges({ inhand: d.inhand, onway: d.onway, prs: d.prs }))
+      .then(d => {
+        setBadges({ inhand: d.inhand, onway: d.onway, prs: d.prs });
+        setAlerts({ d60: d.aging?.d60 || 0, d90: d.aging?.d90 || 0, thisMonth: d.this_month || 0, target: d.target || null });
+      })
       .catch(() => {});
   }, [section]);
+
+  useEffect(() => {
+    const handler = (e) => { if (notifRef.current && !notifRef.current.contains(e.target)) setNotifOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   const showToast = useCallback((message, type = 'ok') => {
     setToast({ message, type, visible: true });
@@ -129,6 +144,12 @@ export default function Layout() {
 
   const currentSection = SECTIONS.find(s => s.key === section);
   const currentGroup   = currentSection?.group || '';
+
+  const now        = new Date();
+  const daysPct    = (now.getDate() / new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()) * 100;
+  const behindPace = alerts.target?.profit_target > 0 &&
+    (alerts.thisMonth / alerts.target.profit_target) * 100 < daysPct - 10;
+  const critCount  = (alerts.d90 > 0 ? 1 : 0) + (alerts.d60 > 0 ? 1 : 0) + (behindPace ? 1 : 0);
 
   return (
     <div className={`layout-root ${collapsed ? 'sb-collapsed' : ''}`}>
@@ -245,6 +266,70 @@ export default function Layout() {
               <ExchangeRate from="JPY" to="LKR" label="JPY/LKR" flag="¥" />
               <ExchangeRate from="USD" to="LKR" label="USD/LKR" flag="$" />
             </div>
+            <div className="notif-wrap" ref={notifRef}>
+              <button
+                className={`notif-bell ${critCount > 0 ? 'ringing' : ''}`}
+                onClick={() => setNotifOpen(v => !v)}
+                title="Alerts"
+              >
+                <i className="fa fa-bell" />
+                {critCount > 0 && <span className="notif-badge">{critCount}</span>}
+              </button>
+
+              {notifOpen && (
+                <div className="notif-panel">
+                  <div className="notif-panel-hdr">ALERTS</div>
+
+                  {alerts.d90 > 0 && (
+                    <div className="notif-item ni-crit" onClick={() => { navigate('/inhand'); setNotifOpen(false); }}>
+                      <i className="fa fa-triangle-exclamation notif-item-icon" />
+                      <div className="notif-item-body">
+                        <strong>{alerts.d90} vehicle{alerts.d90 > 1 ? 's' : ''} CRITICAL</strong>
+                        <span>90+ days in stock — sell immediately</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {alerts.d60 > 0 && (
+                    <div className="notif-item ni-warn" onClick={() => { navigate('/inhand'); setNotifOpen(false); }}>
+                      <i className="fa fa-clock notif-item-icon" />
+                      <div className="notif-item-body">
+                        <strong>{alerts.d60} vehicle{alerts.d60 > 1 ? 's' : ''} URGENT</strong>
+                        <span>60 – 90 days in stock</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {behindPace && (
+                    <div className="notif-item ni-warn" onClick={() => { navigate('/dashboard'); setNotifOpen(false); }}>
+                      <i className="fa fa-chart-line notif-item-icon" />
+                      <div className="notif-item-body">
+                        <strong>Behind monthly target</strong>
+                        <span>Profit pace is below schedule</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {badges.prs > 0 && (
+                    <div className="notif-item ni-info" onClick={() => { navigate('/pricerequests'); setNotifOpen(false); }}>
+                      <i className="fa fa-comments-dollar notif-item-icon" />
+                      <div className="notif-item-body">
+                        <strong>{badges.prs} price request{badges.prs > 1 ? 's' : ''}</strong>
+                        <span>Pending customer inquiries</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {critCount === 0 && badges.prs === 0 && (
+                    <div className="notif-empty">
+                      <i className="fa fa-circle-check" style={{ color: 'var(--g)', marginRight: 6 }} />
+                      All clear — no alerts
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             <div className="pill">
               <span className="pill-dot" />
               ADMIN
@@ -262,7 +347,8 @@ export default function Layout() {
             <Route path="/onway"         element={<Vehicles          showToast={showToast} defaultStatus="ON THE WAY" />} />
             <Route path="/advance"       element={<AdvancePaid       showToast={showToast} />} />
             <Route path="/lc"            element={<LCTracker         showToast={showToast} />} />
-            <Route path="/taxreport"     element={<TaxManager    showToast={showToast} />} />
+            <Route path="/taxreport"        element={<TaxManager        showToast={showToast} />} />
+            <Route path="/businessexpenses" element={<BusinessExpenses  showToast={showToast} />} />
             <Route path="/pricerequests" element={<PriceRequests showToast={showToast} />} />
             <Route path="/customers"     element={<CustomerDetails showToast={showToast} />} />
             <Route path="/documents"     element={<Documents     showToast={showToast} />} />
