@@ -164,6 +164,111 @@ function MonthlyChart({ monthly, thisMonth, lastMonth, avgMonthly, winRate, prof
   );
 }
 
+const BANDS = [
+  { key: 'fresh', label: '< 30 DAYS',   tag: 'FRESH',    color: '#22c55e', glow: 'rgba(34,197,94,.3)'   },
+  { key: 'd30',   label: '30 – 60 DAYS',tag: 'MONITOR',  color: '#94a3b8', glow: 'rgba(148,163,184,.25)' },
+  { key: 'd60',   label: '60 – 90 DAYS',tag: 'URGENT',   color: '#f59e0b', glow: 'rgba(245,158,11,.3)'   },
+  { key: 'd90',   label: '90+ DAYS',    tag: 'CRITICAL', color: '#e53935', glow: 'rgba(229,57,53,.35)'   },
+];
+
+function AgingHudCard({ count, label, tag, color, glow, pct, delay, pulse }) {
+  const anim = useCountUp(count);
+  return (
+    <div className={`ahc ${pulse && count > 0 ? 'ahc-crit' : ''}`}
+      style={{ '--ac': color, '--ag': glow, animationDelay: `${delay}ms` }}>
+      <div className="ahc-tag">{tag}</div>
+      <div className="ahc-count">{anim}</div>
+      <div className="ahc-label">{label}</div>
+      <div className="ahc-bottom">
+        <span className="ahc-pct">{pct}%</span>
+        <div className="ahc-bar"><div className="ahc-bar-fill" style={{ width: `${pct}%`, animationDelay: `${delay + 320}ms` }} /></div>
+      </div>
+    </div>
+  );
+}
+
+function AgingPanel({ aging, navigate }) {
+  if (!aging) return null;
+  const counts = { fresh: aging.fresh || 0, d30: aging.d30 || 0, d60: aging.d60 || 0, d90: aging.d90 || 0 };
+  const total  = Object.values(counts).reduce((a, b) => a + b, 0);
+  if (total === 0) return null;
+
+  const pct = n => total > 0 ? ((n / total) * 100).toFixed(1) : '0';
+
+  return (
+    <div className="aging-panel">
+      {/* Header */}
+      <div className="aging-ph">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span className="aging-live-dot" />
+          <span className="aging-ph-title">INVENTORY AGING</span>
+          <span className="aging-ph-sub">{total} vehicles tracked</span>
+        </div>
+        <button className="btn-secondary" onClick={() => navigate('/inhand')}>
+          <i className="fa fa-arrow-right" /> View In Hand
+        </button>
+      </div>
+
+      {/* 4 metric cards */}
+      <div className="ahc-grid">
+        {BANDS.map(({ key, label, tag, color, glow }, i) => (
+          <AgingHudCard key={key} count={counts[key]} label={label} tag={tag}
+            color={color} glow={glow} pct={pct(counts[key])}
+            delay={i * 90} pulse={key === 'd90'} />
+        ))}
+      </div>
+
+      {/* Distribution bar */}
+      <div className="aging-dist-outer">
+        <div className="aging-dist-bar">
+          {BANDS.map(({ key, color }, i) => {
+            const p = parseFloat(pct(counts[key]));
+            return p > 0 ? (
+              <div key={key} className="aging-dist-seg"
+                style={{ width: `${p}%`, background: color, animationDelay: `${i * 110}ms` }} />
+            ) : null;
+          })}
+        </div>
+        <div className="aging-dist-labels">
+          {BANDS.map(({ key, tag, color }) => (
+            <span key={key} style={{ color, opacity: counts[key] > 0 ? 1 : .25, fontSize: '.56rem', fontFamily: "'Josefin Sans',sans-serif", letterSpacing: '1px' }}>
+              {tag} {pct(counts[key])}%
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Top longest in stock */}
+      {aging.top && aging.top.length > 0 && (
+        <div className="aging-top-section">
+          <div className="aging-top-hdr">
+            <span className="aging-top-ttl">LONGEST IN STOCK</span>
+            <div className="aging-trace-line" />
+          </div>
+          {aging.top.map((v, i) => {
+            const isCrit = v.days >= 90, isUrg = v.days >= 60, isMon = v.days >= 30;
+            const col = isCrit ? '#e53935' : isUrg ? '#f59e0b' : isMon ? '#94a3b8' : '#22c55e';
+            const tag = isCrit ? 'CRITICAL' : isUrg ? 'URGENT' : isMon ? 'MONITOR' : 'FRESH';
+            return (
+              <div key={v.id} className={`aging-top-row ${isCrit ? 'atr-crit' : ''}`}
+                style={{ animationDelay: `${i * 55}ms` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: '.6rem', color: 'var(--t3)', fontFamily: "'Josefin Sans',sans-serif" }}>#{v.no}</span>
+                  <span style={{ fontSize: '.82rem', color: '#fff', fontWeight: 600 }}>{v.brand} {v.model}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontFamily: "'Josefin Sans',sans-serif", fontWeight: 700, fontSize: '.82rem', color: col }}>{v.days}d</span>
+                  <span className="aging-stag" style={{ color: col, borderColor: `${col}55`, background: `${col}14` }}>{tag}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function BrandList({ brands, navigate }) {
   if (!brands || !brands.length) return null;
   return (
@@ -234,6 +339,9 @@ export default function Dashboard({ showToast }) {
         thisMonth={data.this_month}
         thisMonthCount={data.this_month_count}
       />
+
+      {/* ── Inventory Aging HUD ── */}
+      <AgingPanel aging={data.aging} navigate={navigate} />
 
       {/* ── Monthly Chart ── */}
       <MonthlyChart
