@@ -28,7 +28,8 @@
       "Bash(node fix-types.mjs)",
       "Bash(grep -E \"\\\\.\\(jsx?|tsx?\\)$\")",
       "Skill(run)",
-      "Skill(run:*)"
+      "Skill(run:*)",
+      "Bash(npx react-scripts *)"
     ],
     "additionalDirectories": [
       "d:\\react-app\\client"

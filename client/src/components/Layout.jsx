@@ -12,34 +12,53 @@ import Documents from './Documents';
 import Users from './Users';
 import Settings from './Settings';
 import AdvancePaid from './AdvancePaid';
+import PriceRequests from './PriceRequests';
 
 const SECTIONS = [
-  { key: 'dashboard', icon: 'fa-chart-line', label: 'Dashboard', group: 'Main' },
-  { key: 'vehicles', icon: 'fa-car', label: 'Vehicle Register', group: 'Main' },
-  { key: 'lc', icon: 'fa-file-invoice', label: 'LC Tracker', group: 'Main' },
-  { key: 'profit', icon: 'fa-coins', label: 'Profit Report', group: 'Main' },
-  { key: 'inhand', icon: 'fa-warehouse', label: 'In Hand', group: 'Status', badge: 'inhand' },
-  { key: 'onway', icon: 'fa-ship', label: 'On The Way', group: 'Status', badge: 'onway' },
-  { key: 'advance', icon: 'fa-clock', label: 'Advance Paid', group: 'Status' },
-  { key: 'taxreport', icon: 'fa-file-invoice-dollar', label: 'VAT & SSCL', group: 'Finance' },
-  { key: 'customers', icon: 'fa-address-book', label: 'Customer Details', group: 'Customer' },
-  { key: 'documents', icon: 'fa-folder-open', label: 'Documents', group: 'Customer' },
-  { key: 'users', icon: 'fa-users', label: 'User Accounts', group: 'Management' },
-  { key: 'settings', icon: 'fa-gear', label: 'Settings', group: 'Management' },
+  { key: 'dashboard',     icon: 'fa-gauge-high',       label: 'Dashboard',        group: 'COMMAND'   },
+  { key: 'vehicles',      icon: 'fa-car-side',         label: 'Vehicle Register', group: 'INVENTORY' },
+  { key: 'inhand',        icon: 'fa-warehouse',        label: 'In Hand',          group: 'INVENTORY', badge: 'inhand' },
+  { key: 'onway',         icon: 'fa-ship',             label: 'On The Way',       group: 'INVENTORY', badge: 'onway'  },
+  { key: 'advance',       icon: 'fa-money-bill-wave',  label: 'Advance Paid',     group: 'INVENTORY' },
+  { key: 'lc',            icon: 'fa-file-contract',    label: 'LC Tracker',       group: 'IMPORT'    },
+  { key: 'profit',        icon: 'fa-chart-line',       label: 'Profit Report',    group: 'FINANCE'   },
+  { key: 'taxreport',     icon: 'fa-receipt',          label: 'VAT & SSCL',       group: 'FINANCE'   },
+  { key: 'pricerequests', icon: 'fa-comments-dollar',  label: 'Price Requests',   group: 'CLIENTS',  badge: 'prs'   },
+  { key: 'customers',     icon: 'fa-address-card',     label: 'Customers',        group: 'CLIENTS'   },
+  { key: 'documents',     icon: 'fa-folder-open',      label: 'Documents',        group: 'CLIENTS'   },
+  { key: 'users',         icon: 'fa-users-gear',       label: 'User Accounts',    group: 'SYSTEM'    },
+  { key: 'settings',      icon: 'fa-sliders',          label: 'Settings',         group: 'SYSTEM'    },
 ];
 
 const TITLES = {
-  dashboard: 'DASHBOARD', vehicles: 'VEHICLE REGISTER', lc: 'LC TRACKER',
-  profit: 'PROFIT REPORT', inhand: 'IN HAND', onway: 'ON THE WAY',
-  advance: 'ADVANCE PAID',
-  taxreport: 'VAT & SSCL', customers: 'CUSTOMER DETAILS', documents: 'VEHICLE DOCUMENTS',
-  users: 'USER ACCOUNTS', settings: 'SETTINGS'
+  dashboard:     'Dashboard',
+  vehicles:      'Vehicle Register',
+  inhand:        'In Hand',
+  onway:         'On The Way',
+  advance:       'Advance Paid',
+  lc:            'LC Tracker',
+  profit:        'Profit Report',
+  taxreport:     'VAT & SSCL',
+  pricerequests: 'Price Requests',
+  customers:     'Customers',
+  documents:     'Documents',
+  users:         'User Accounts',
+  settings:      'Settings',
+};
+
+const GROUP_ICONS = {
+  COMMAND:   'fa-terminal',
+  INVENTORY: 'fa-boxes-stacked',
+  IMPORT:    'fa-anchor',
+  FINANCE:   'fa-coins',
+  CLIENTS:   'fa-users',
+  SYSTEM:    'fa-shield-halved',
 };
 
 function Clock({ tz, label, flag }) {
-  const [time, setTime] = useState('--:--:--');
+  const [time, setTime] = useState('');
   useEffect(() => {
-    const tick = () => setTime(new Date().toLocaleTimeString('en-US', { timeZone: tz, hour12: true }));
+    const tick = () => setTime(new Date().toLocaleTimeString('en-US', { timeZone: tz, hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' }));
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
@@ -49,7 +68,7 @@ function Clock({ tz, label, flag }) {
       <span className="ck-flag">{flag}</span>
       <div className="ck-info">
         <span className="ck-lbl">{label}</span>
-        <span className="ck-val">{time}</span>
+        <span className="ck-val">{time || '--:--:--'}</span>
       </div>
     </div>
   );
@@ -79,30 +98,30 @@ function ExchangeRate({ from, to, label, flag }) {
 }
 
 function Toast({ message, type, visible }) {
-  return (
-    <div className={`toast ${type} ${visible ? 'show' : ''}`}>{message}</div>
-  );
+  return <div className={`toast ${type} ${visible ? 'show' : ''}`}>{message}</div>;
 }
 
 export default function Layout() {
   const { username, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [badges, setBadges] = useState({ inhand: 0, onway: 0 });
-  const [toast, setToast] = useState({ message: '', type: 'ok', visible: false });
+  const [sidebarOpen, setSidebarOpen]   = useState(false);
+  const [collapsed, setCollapsed]       = useState(false);
+  const [badges, setBadges]             = useState({ inhand: 0, onway: 0, prs: 0 });
+  const [toast, setToast]               = useState({ message: '', type: 'ok', visible: false });
 
   const section = location.pathname.replace('/', '') || 'dashboard';
+  const groups  = [...new Set(SECTIONS.map(s => s.group))];
 
   useEffect(() => {
-    getDashboardStats().then(d => {
-      setBadges({ inhand: d.inhand, onway: d.onway });
-    }).catch(() => {});
+    getDashboardStats()
+      .then(d => setBadges({ inhand: d.inhand, onway: d.onway, prs: d.prs }))
+      .catch(() => {});
   }, [section]);
 
   const showToast = useCallback((message, type = 'ok') => {
     setToast({ message, type, visible: true });
-    setTimeout(() => setToast(t => ({ ...t, visible: false })), 3000);
+    setTimeout(() => setToast(t => ({ ...t, visible: false })), 3200);
   }, []);
 
   const go = (key) => {
@@ -110,87 +129,150 @@ export default function Layout() {
     setSidebarOpen(false);
   };
 
-  const groups = [...new Set(SECTIONS.map(s => s.group))];
+  const currentSection = SECTIONS.find(s => s.key === section);
+  const currentGroup   = currentSection?.group || '';
 
   return (
-    <div className="layout-root">
+    <div className={`layout-root ${collapsed ? 'sb-collapsed' : ''}`}>
       <div className={`overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} />
 
-      <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
-        <div className="sb-logo">
-          <div className="sb-brand"><div className="sb-dot" /><h2>Fernando</h2></div>
-          <p className="sb-sub">AUTO DEALERS · ADMIN</p>
+      {/* ── Sidebar ─────────────────────────────────────────── */}
+      <aside className={`sidebar ${sidebarOpen ? 'open' : ''} ${collapsed ? 'collapsed' : ''}`}>
+
+        {/* Logo */}
+        <div className="sb-head">
+          <div className="sb-logo">
+            <div className="sb-logo-mark">
+              <div className="sb-dot" />
+            </div>
+            {!collapsed && (
+              <div className="sb-brand-text">
+                <span className="sb-name">Fernando</span>
+                <span className="sb-sub">AUTO DEALERS · ADMIN</span>
+              </div>
+            )}
+          </div>
+          <button
+            className="sb-collapse-btn"
+            onClick={() => setCollapsed(v => !v)}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            <i className={`fa ${collapsed ? 'fa-chevron-right' : 'fa-chevron-left'}`} />
+          </button>
         </div>
+
+        {/* Status indicator */}
+        {!collapsed && (
+          <div className="sb-status">
+            <span className="sb-status-dot" />
+            <span className="sb-status-text">SYSTEM ONLINE</span>
+          </div>
+        )}
+
+        {/* Nav */}
         <nav className="sb-nav">
-          {groups.map(group => (
-            <div key={group}>
-              <div className="nav-group">{group}</div>
-              {SECTIONS.filter(s => s.group === group).map(s => (
-                <div
+          {groups.map((group, gi) => (
+            <div key={group} className="sb-section">
+              {!collapsed && (
+                <div className="nav-group">
+                  <i className={`fa ${GROUP_ICONS[group] || 'fa-circle'}`} />
+                  {group}
+                </div>
+              )}
+              {collapsed && gi > 0 && <div className="nav-group-divider" />}
+              {SECTIONS.filter(s => s.group === group).map((s, i) => (
+                <button
                   key={s.key}
                   className={`nav-item ${section === s.key ? 'active' : ''}`}
                   onClick={() => go(s.key)}
+                  title={collapsed ? s.label : undefined}
+                  style={{ animationDelay: `${(gi * 3 + i) * 35}ms` }}
                 >
-                  <i className={`fa ${s.icon}`} />
-                  {s.label}
+                  <span className="nav-item-icon">
+                    <i className={`fa ${s.icon}`} />
+                  </span>
+                  {!collapsed && <span className="nav-item-label">{s.label}</span>}
                   {s.badge && badges[s.badge] > 0 && (
-                    <span className="nav-badge">{badges[s.badge]}</span>
+                    <span className={`nav-badge ${collapsed ? 'nb-dot' : ''}`}>
+                      {collapsed ? '' : badges[s.badge]}
+                    </span>
                   )}
-                </div>
+                  {section === s.key && <span className="nav-active-bar" />}
+                </button>
               ))}
             </div>
           ))}
         </nav>
+
+        {/* Footer */}
         <div className="sb-footer">
           <div className="sb-user">
-            <div className="sb-avatar">{username.slice(0, 2).toUpperCase()}</div>
-            <div className="sb-info">
-              <p>{username}</p>
-              <span>Fernando Auto Dealers</span>
+            <div className="sb-avatar">
+              {username.slice(0, 2).toUpperCase()}
             </div>
+            {!collapsed && (
+              <div className="sb-info">
+                <p className="sb-uname">{username}</p>
+                <span className="sb-urole">Administrator</span>
+              </div>
+            )}
           </div>
-          <button className="sb-logout" onClick={logout}>
-            <i className="fa fa-right-from-bracket" /> Sign Out
+          <button className="sb-logout" onClick={logout} title="Sign out">
+            <i className="fa fa-right-from-bracket" />
+            {!collapsed && <span>Sign Out</span>}
           </button>
         </div>
       </aside>
 
+      {/* ── Main ─────────────────────────────────────────────── */}
       <div className="main">
-        <div className="topbar">
+
+        {/* Topbar */}
+        <header className="topbar">
           <div className="topbar-left">
-            <button className="ham" onClick={() => setSidebarOpen(v => !v)}>
+            <button className="ham" onClick={() => setSidebarOpen(v => !v)} aria-label="Menu">
               <span /><span /><span />
             </button>
-            <span className="topbar-title">{TITLES[section] || section.toUpperCase()}</span>
+            <div className="topbar-breadcrumb">
+              <span className="tb-group">{currentGroup}</span>
+              {currentGroup && <span className="tb-sep"><i className="fa fa-chevron-right" /></span>}
+              <span className="topbar-title">{TITLES[section] || section.toUpperCase()}</span>
+            </div>
           </div>
+
           <div className="topbar-right">
             <div className="clocks-bar">
-              <Clock tz="Asia/Colombo" label="Sri Lanka" flag="🇱🇰" />
-              <Clock tz="Asia/Tokyo" label="Japan" flag="🇯🇵" />
-              <ExchangeRate from="JPY" to="LKR" label="JPY → LKR" flag="💴" />
-              <ExchangeRate from="USD" to="LKR" label="USD → LKR" flag="💵" />
+              <Clock tz="Asia/Colombo" label="COLOMBO" flag="🇱🇰" />
+              <Clock tz="Asia/Tokyo"   label="TOKYO"   flag="🇯🇵" />
+              <ExchangeRate from="JPY" to="LKR" label="JPY/LKR" flag="¥" />
+              <ExchangeRate from="USD" to="LKR" label="USD/LKR" flag="$" />
             </div>
-            <span className="pill">ADMIN</span>
+            <div className="pill">
+              <span className="pill-dot" />
+              ADMIN
+            </div>
           </div>
-        </div>
+        </header>
 
-        <div className="content">
+        {/* Content */}
+        <main className="content">
           <Routes>
-            <Route path="/" element={<Dashboard showToast={showToast} />} />
-            <Route path="/dashboard" element={<Dashboard showToast={showToast} />} />
-            <Route path="/vehicles" element={<Vehicles showToast={showToast} />} />
-            <Route path="/inhand" element={<Vehicles showToast={showToast} defaultStatus="IN HAND" />} />
-            <Route path="/onway" element={<Vehicles showToast={showToast} defaultStatus="ON THE WAY" />} />
-            <Route path="/advance" element={<AdvancePaid showToast={showToast} />} />
-            <Route path="/lc" element={<LCTracker showToast={showToast} />} />
-            <Route path="/profit" element={<ProfitReport showToast={showToast} />} />
-            <Route path="/taxreport" element={<TaxManager showToast={showToast} />} />
-            <Route path="/customers" element={<CustomerDetails showToast={showToast} />} />
-            <Route path="/documents" element={<Documents showToast={showToast} />} />
-            <Route path="/users" element={<Users showToast={showToast} />} />
-            <Route path="/settings" element={<Settings showToast={showToast} />} />
+            <Route path="/"              element={<Dashboard     showToast={showToast} />} />
+            <Route path="/dashboard"     element={<Dashboard     showToast={showToast} />} />
+            <Route path="/vehicles"      element={<Vehicles      showToast={showToast} />} />
+            <Route path="/inhand"        element={<Vehicles      showToast={showToast} defaultStatus="IN HAND" />} />
+            <Route path="/onway"         element={<Vehicles      showToast={showToast} defaultStatus="ON THE WAY" />} />
+            <Route path="/advance"       element={<AdvancePaid   showToast={showToast} />} />
+            <Route path="/lc"            element={<LCTracker     showToast={showToast} />} />
+            <Route path="/profit"        element={<ProfitReport  showToast={showToast} />} />
+            <Route path="/taxreport"     element={<TaxManager    showToast={showToast} />} />
+            <Route path="/pricerequests" element={<PriceRequests showToast={showToast} />} />
+            <Route path="/customers"     element={<CustomerDetails showToast={showToast} />} />
+            <Route path="/documents"     element={<Documents     showToast={showToast} />} />
+            <Route path="/users"         element={<Users         showToast={showToast} />} />
+            <Route path="/settings"      element={<Settings      showToast={showToast} />} />
           </Routes>
-        </div>
+        </main>
       </div>
 
       <Toast {...toast} />
