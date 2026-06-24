@@ -571,6 +571,10 @@ export default function Vehicles({ showToast, defaultStatus = '' }) {
               ) : vehicles.map(v => {
                 const finalCost = fc(v);
                 const inc = v.income != null ? parseFloat(v.income) : null;
+                const ageDays = (v.status === 'IN HAND' && v.clear_date)
+                  ? Math.floor((Date.now() - new Date(v.clear_date)) / 86400000)
+                  : null;
+                const ageCls = ageDays === null ? '' : ageDays >= 90 ? 'age-90' : ageDays >= 60 ? 'age-60' : ageDays >= 30 ? 'age-30' : 'age-fresh';
                 return (
                   <tr key={v.id}>
                     <td>
@@ -582,6 +586,9 @@ export default function Vehicles({ showToast, defaultStatus = '' }) {
                     <td>
                       <span className={`badge ${v.status === 'SOLD' ? 'b-sold' : v.status === 'IN HAND' ? 'b-inhand' : 'b-onway'}`}>{v.status}</span>
                       {v.payment_type === 'ADVANCE' && <span className="badge b-pending" style={{ marginLeft: 4 }}>ADV</span>}
+                      {ageDays !== null && ageDays >= 0 && (
+                        <span className={`age-tag ${ageCls}`} style={{ marginLeft: 4 }}>{ageDays}d</span>
+                      )}
                     </td>
                     <td><span className={`badge ${v.type === 'LOCAL' ? 'b-local' : 'b-import'}`}>{v.type}</span></td>
                     <td><strong>{v.brand}</strong></td>

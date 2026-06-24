@@ -936,3 +936,156 @@ select.filter option { background: var(--bg3); }
   select.filter { flex: 1 1 100%; }
   .topbar-title { max-width: 160px; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   INVENTORY AGING
+═══════════════════════════════════════════════════════════ */
+
+/* Inline age badge in Vehicles table */
+.age-tag {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 2px 7px; border-radius: 20px;
+  font-size: .6rem; font-weight: 700;
+  font-family: 'Josefin Sans', sans-serif; letter-spacing: .5px;
+  border: 1px solid transparent;
+}
+.age-fresh { background: rgba(34,197,94,.12); color: #22c55e; border-color: rgba(34,197,94,.25); }
+.age-30    { background: rgba(245,158,11,.12); color: #f59e0b; border-color: rgba(245,158,11,.25); }
+.age-60    { background: rgba(249,115,22,.13); color: #f97316; border-color: rgba(249,115,22,.25); }
+.age-90    {
+  background: rgba(229,57,53,.15); color: var(--rl); border-color: rgba(229,57,53,.35);
+  animation: dotPulse 1.6s ease-in-out infinite;
+}
+
+/* AgingWidget grid */
+.aging-grid {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 10px;
+}
+.aging-band {
+  border-radius: 12px; padding: 12px 10px; text-align: center;
+  border: 1px solid var(--br); transition: transform .2s;
+}
+.aging-band:hover { transform: translateY(-2px); }
+.ag-fresh { background: rgba(34,197,94,.07);  border-color: rgba(34,197,94,.15); }
+.ag-30    { background: rgba(245,158,11,.07); border-color: rgba(245,158,11,.15); }
+.ag-60    { background: rgba(249,115,22,.07); border-color: rgba(249,115,22,.15); }
+.ag-90    { background: rgba(229,57,53,.08);  border-color: rgba(229,57,53,.2); }
+.aging-count {
+  font-size: 1.8rem; font-weight: 900; line-height: 1;
+  font-family: 'Josefin Sans', sans-serif;
+}
+.ag-fresh .aging-count { color: #22c55e; }
+.ag-30    .aging-count { color: #f59e0b; }
+.ag-60    .aging-count { color: #f97316; }
+.ag-90    .aging-count { color: var(--rl); }
+.aging-lbl { font-size: .62rem; color: var(--t3); margin-top: 4px; }
+.aging-tag {
+  display: inline-block; margin-top: 6px; padding: 2px 8px;
+  border-radius: 20px; font-size: .58rem; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  font-family: 'Josefin Sans', sans-serif;
+}
+.ag-fresh .aging-tag { background: rgba(34,197,94,.15);  color: #22c55e; }
+.ag-30    .aging-tag { background: rgba(245,158,11,.15); color: #f59e0b; }
+.ag-60    .aging-tag { background: rgba(249,115,22,.15); color: #f97316; }
+.ag-90    .aging-tag { background: rgba(229,57,53,.15);  color: var(--rl); }
+
+.aging-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 7px 10px; border-radius: 8px; background: var(--bg3);
+  border: 1px solid var(--br); margin-bottom: 5px;
+  transition: background .2s;
+}
+.aging-row:hover { background: var(--bg4); }
+
+/* ═══════════════════════════════════════════════════════════
+   MONTHLY TARGET PROGRESS
+═══════════════════════════════════════════════════════════ */
+
+.target-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
+.target-item { display: flex; flex-direction: column; gap: 4px; }
+.target-labels {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;
+}
+.target-track {
+  position: relative; height: 8px; background: var(--bg3);
+  border-radius: 99px; overflow: visible; border: 1px solid var(--br);
+}
+.target-fill {
+  height: 100%; border-radius: 99px;
+  transition: width .6s cubic-bezier(.34,1.56,.64,1);
+}
+.target-day-mark {
+  position: absolute; top: -4px; width: 2px; height: 16px;
+  background: rgba(255,255,255,.35); border-radius: 2px;
+  transform: translateX(-50%);
+  box-shadow: 0 0 4px rgba(255,255,255,.2);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PRICE REQUEST PIPELINE
+═══════════════════════════════════════════════════════════ */
+
+.pr-pipeline {
+  display: flex; gap: 8px; margin-bottom: 16px;
+  overflow-x: auto; padding-bottom: 2px;
+}
+.pr-stage-btn {
+  flex: 1; min-width: 72px; max-width: 120px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 12px 8px;
+  background: var(--bg2); border: 1.5px solid var(--br); border-radius: 12px;
+  cursor: pointer; transition: all .2s;
+  color: var(--t3);
+  font-family: 'Josefin Sans', sans-serif;
+}
+.pr-stage-btn i { font-size: .9rem; color: var(--sc, var(--t3)); transition: color .2s; }
+.pr-stage-btn.active {
+  background: color-mix(in srgb, var(--sc) 12%, transparent);
+  border-color: var(--sc);
+  color: #fff;
+}
+.pr-stage-btn:hover:not(.active) {
+  background: var(--bg3); border-color: var(--sc);
+}
+.pr-stage-count {
+  font-size: 1.4rem; font-weight: 900; line-height: 1;
+  color: var(--sc, var(--t2));
+}
+.pr-stage-name {
+  font-size: .6rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 700;
+}
+
+/* Status pill in table */
+.pr-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 9px; border-radius: 20px;
+  background: color-mix(in srgb, var(--pc) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--pc) 30%, transparent);
+  color: var(--pc);
+  font-size: .68rem; font-weight: 700;
+  font-family: 'Josefin Sans', sans-serif; letter-spacing: .5px;
+}
+.pr-pill i { font-size: .72rem; }
+
+/* Action icon buttons */
+.btn-icon {
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg3); border: 1px solid var(--br);
+  border-radius: 8px; cursor: pointer; color: var(--t2);
+  font-size: .8rem; transition: all .2s;
+}
+.btn-icon:hover { background: var(--bg4); color: #fff; border-color: var(--r); }
+.btn-icon.danger:hover { background: rgba(229,57,53,.15); color: var(--rl); border-color: var(--rl); }
+.btn-icon:disabled { opacity: .4; cursor: not-allowed; }
+
+@media (max-width: 640px) {
+  .aging-grid { grid-template-columns: repeat(2,1fr); }
+  .target-grid { grid-template-columns: 1fr; }
+  .pr-pipeline { gap: 6px; }
+  .pr-stage-btn { min-width: 60px; padding: 10px 6px; }
+  .pr-stage-count { font-size: 1.1rem; }
+}

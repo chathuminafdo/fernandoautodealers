@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { getProfitReport } from '../services/dashboardService';
+import * as XLSX from 'xlsx';
 
 const fmt = n => n == null ? '—' : Number(n).toLocaleString('en-LK', { maximumFractionDigits: 0 });
 const fmtD = d => { if (!d) return '—'; const s = d.split('T')[0]; const [y, m, dy] = s.split('-'); return `${dy}/${m}/${y}`; };
@@ -34,14 +35,28 @@ export default function ProfitReport({ showToast }) {
     </button>
   );
 
-  const exportCSV = () => {
-    const cols = ['#', 'Brand', 'Model', 'Type', 'Chassis', 'Cost', 'Sell Price', 'Income', 'Sell Date', 'Contact'];
-    const data = rows.map(v => [v.no, v.brand, v.model, v.type, v.chassis || '', v.cost || '', v.sell_price || '', v.income || '', fmtD(v.sell_date), v.contact || '']);
-    const csv = [cols, ...data].map(r => r.join(',')).join('\n');
-    const a = document.createElement('a');
-    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-    a.download = 'profit-report.csv';
-    a.click();
+  const exportXLSX = () => {
+    const header = ['#', 'Brand', 'Model', 'Type', 'Chassis', 'Cost (LKR)', 'Sell Price (LKR)', 'Income (LKR)', 'Margin %', 'Sell Date', 'Contact'];
+    const data = rows.map(v => {
+      const margin = v.cost && v.sell_price ? ((v.sell_price - v.cost) / v.sell_price * 100).toFixed(1) : '';
+      return [v.no, v.brand, v.model, v.type, v.chassis || '', Number(v.cost) || 0, Number(v.sell_price) || 0, Number(v.income) || 0, margin ? Number(margin) : '', fmtD(v.sell_date), v.contact || ''];
+    });
+    if (totals) {
+      data.push([]);
+      data.push(['', 'TOTALS', '', '', '', totals.total_cost, totals.total_sales, totals.total_income, '', '', '']);
+      data.push(['', 'Best Profit', '', '', '', '', '', totals.best, '', '', '']);
+      data.push(['', 'Worst Result', '', '', '', '', '', totals.worst, '', '', '']);
+      data.push(['', 'Total Vehicles', totals.count, '', '', '', '', '', '', '', '']);
+    }
+    const ws = XLSX.utils.aoa_to_sheet([header, ...data]);
+    ws['!cols'] = [
+      { wch: 8 }, { wch: 14 }, { wch: 16 }, { wch: 8 }, { wch: 18 },
+      { wch: 16 }, { wch: 18 }, { wch: 18 }, { wch: 10 }, { wch: 12 }, { wch: 20 },
+    ];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Profit Report');
+    const today = new Date().toISOString().split('T')[0];
+    XLSX.writeFile(wb, `profit-report-${today}.xlsx`);
   };
 
   const avg = totals?.total_sales > 0 ? ((totals.total_income / totals.total_sales) * 100).toFixed(1) + '%' : '—';
@@ -62,7 +77,7 @@ export default function ProfitReport({ showToast }) {
           <h3>PROFIT LEDGER</h3>
           <div className="card-header-right">
             <div className="search-wrap"><i className="fa fa-search" /><input value={q} onChange={e => setQ(e.target.value)} placeholder="Search…" /></div>
-            <button className="btn-secondary" onClick={exportCSV}><i className="fa fa-download" /> CSV</button>
+            <button className="btn-secondary" onClick={exportXLSX}><i className="fa fa-file-excel" /> Excel</button>
           </div>
         </div>
         <div className="table-wrap">

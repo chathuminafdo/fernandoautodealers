@@ -20,8 +20,12 @@ export const createPriceRequest = async (data) => {
   });
 };
 
+export const updatePriceRequest = async (id, data) => {
+  await updateDoc(doc(db, COL, id), { ...data, updated_at: new Date().toISOString() });
+};
+
 export const updatePriceRequestStatus = async (id, status) => {
-  await updateDoc(doc(db, COL, id), { status });
+  await updateDoc(doc(db, COL, id), { status, updated_at: new Date().toISOString() });
 };
 
 export const deletePriceRequest = async (id) => {
