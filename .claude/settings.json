@@ -25,7 +25,10 @@
       "Bash(node import-all-vehicles.mjs)",
       "Bash(node fix-status.mjs)",
       "Bash(node fix-38.mjs)",
-      "Bash(node fix-types.mjs)"
+      "Bash(node fix-types.mjs)",
+      "Bash(grep -E \"\\\\.\\(jsx?|tsx?\\)$\")",
+      "Skill(run)",
+      "Skill(run:*)"
     ],
     "additionalDirectories": [
       "d:\\react-app\\client"
