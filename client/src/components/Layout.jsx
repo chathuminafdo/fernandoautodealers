@@ -5,7 +5,7 @@ import { getDashboardStats } from '../services/dashboardService';
 import Dashboard from './Dashboard';
 import Vehicles from './Vehicles';
 import LCTracker from './LCTracker';
-import ProfitReport from './ProfitReport';
+import VehiclesAndProfit from './VehiclesAndProfit';
 import TaxManager from './TaxManager';
 import CustomerDetails from './CustomerDetails';
 import Documents from './Documents';
@@ -21,7 +21,6 @@ const SECTIONS = [
   { key: 'onway',         icon: 'fa-ship',             label: 'On The Way',       group: 'INVENTORY', badge: 'onway'  },
   { key: 'advance',       icon: 'fa-money-bill-wave',  label: 'Advance Paid',     group: 'INVENTORY' },
   { key: 'lc',            icon: 'fa-file-contract',    label: 'LC Tracker',       group: 'IMPORT'    },
-  { key: 'profit',        icon: 'fa-chart-line',       label: 'Profit Report',    group: 'FINANCE'   },
   { key: 'taxreport',     icon: 'fa-receipt',          label: 'VAT & SSCL',       group: 'FINANCE'   },
   { key: 'pricerequests', icon: 'fa-comments-dollar',  label: 'Price Requests',   group: 'CLIENTS',  badge: 'prs'   },
   { key: 'customers',     icon: 'fa-address-card',     label: 'Customers',        group: 'CLIENTS'   },
@@ -37,7 +36,6 @@ const TITLES = {
   onway:         'On The Way',
   advance:       'Advance Paid',
   lc:            'LC Tracker',
-  profit:        'Profit Report',
   taxreport:     'VAT & SSCL',
   pricerequests: 'Price Requests',
   customers:     'Customers',
@@ -259,12 +257,11 @@ export default function Layout() {
           <Routes>
             <Route path="/"              element={<Dashboard     showToast={showToast} />} />
             <Route path="/dashboard"     element={<Dashboard     showToast={showToast} />} />
-            <Route path="/vehicles"      element={<Vehicles      showToast={showToast} />} />
-            <Route path="/inhand"        element={<Vehicles      showToast={showToast} defaultStatus="IN HAND" />} />
-            <Route path="/onway"         element={<Vehicles      showToast={showToast} defaultStatus="ON THE WAY" />} />
-            <Route path="/advance"       element={<AdvancePaid   showToast={showToast} />} />
-            <Route path="/lc"            element={<LCTracker     showToast={showToast} />} />
-            <Route path="/profit"        element={<ProfitReport  showToast={showToast} />} />
+            <Route path="/vehicles"      element={<VehiclesAndProfit showToast={showToast} />} />
+            <Route path="/inhand"        element={<Vehicles          showToast={showToast} defaultStatus="IN HAND" />} />
+            <Route path="/onway"         element={<Vehicles          showToast={showToast} defaultStatus="ON THE WAY" />} />
+            <Route path="/advance"       element={<AdvancePaid       showToast={showToast} />} />
+            <Route path="/lc"            element={<LCTracker         showToast={showToast} />} />
             <Route path="/taxreport"     element={<TaxManager    showToast={showToast} />} />
             <Route path="/pricerequests" element={<PriceRequests showToast={showToast} />} />
             <Route path="/customers"     element={<CustomerDetails showToast={showToast} />} />

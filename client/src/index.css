@@ -748,6 +748,32 @@ img { max-width: 100%; }
   opacity: .2;
 }
 
+/* ── Inner page tabs (e.g. Vehicle Register / Profit Report) ── */
+.inner-tabs {
+  display: flex; gap: 2px;
+  border-bottom: 1px solid var(--br);
+  margin-bottom: 20px;
+}
+.inner-tab {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px;
+  background: transparent; border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  color: var(--t2);
+  font-size: .76rem; font-weight: 600;
+  font-family: 'Work Sans', sans-serif;
+  letter-spacing: .3px; cursor: pointer;
+  transition: color .18s, border-color .18s;
+  white-space: nowrap;
+}
+.inner-tab i { font-size: .7rem; }
+.inner-tab:hover { color: var(--tx); }
+.inner-tab.active {
+  color: #fff;
+  border-bottom-color: var(--r);
+}
+
 /* ── Dashboard bottom 2-col split ── */
 .dash-split {
   display: grid; grid-template-columns: 3fr 2fr;

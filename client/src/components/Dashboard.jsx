@@ -251,7 +251,7 @@ export default function Dashboard({ showToast }) {
         <div className="card">
           <div className="card-header">
             <h3>RECENT SALES</h3>
-            <button className="btn-primary" onClick={() => navigate('/profit')}>
+            <button className="btn-primary" onClick={() => navigate('/vehicles', { state: { tab: 'profit' } })}>
               <i className="fa fa-arrow-right" /> Full Report
             </button>
           </div>
