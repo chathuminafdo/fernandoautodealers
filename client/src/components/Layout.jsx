@@ -13,7 +13,6 @@ import Documents from './Documents';
 import Users from './Users';
 import Settings from './Settings';
 import AdvancePaid from './AdvancePaid';
-import PriceRequests from './PriceRequests';
 
 const SECTIONS = [
   { key: 'dashboard',     icon: 'fa-gauge-high',       label: 'Dashboard',        group: 'COMMAND'   },
@@ -24,7 +23,6 @@ const SECTIONS = [
   { key: 'lc',            icon: 'fa-file-contract',    label: 'LC Tracker',       group: 'IMPORT'    },
   { key: 'taxreport',        icon: 'fa-receipt',               label: 'VAT & SSCL',        group: 'FINANCE' },
   { key: 'businessexpenses', icon: 'fa-file-invoice-dollar',  label: 'Business Expenses', group: 'FINANCE' },
-  { key: 'pricerequests', icon: 'fa-comments-dollar',  label: 'Price Requests',   group: 'CLIENTS',  badge: 'prs'   },
   { key: 'customers',     icon: 'fa-address-card',     label: 'Customers',        group: 'CLIENTS'   },
   { key: 'documents',     icon: 'fa-folder-open',      label: 'Documents',        group: 'CLIENTS'   },
   { key: 'users',         icon: 'fa-users-gear',       label: 'User Accounts',    group: 'SYSTEM'    },
@@ -40,7 +38,6 @@ const TITLES = {
   lc:            'LC Tracker',
   taxreport:        'VAT & SSCL',
   businessexpenses: 'Business Expenses',
-  pricerequests: 'Price Requests',
   customers:     'Customers',
   documents:     'Documents',
   users:         'User Accounts',
@@ -108,7 +105,7 @@ export default function Layout() {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen]   = useState(false);
   const [collapsed, setCollapsed]       = useState(false);
-  const [badges, setBadges]             = useState({ inhand: 0, onway: 0, prs: 0 });
+  const [badges, setBadges]             = useState({ inhand: 0, onway: 0 });
   const [alerts, setAlerts]             = useState({ d60: 0, d90: 0, thisMonth: 0, target: null });
   const [notifOpen, setNotifOpen]       = useState(false);
   const [toast, setToast]               = useState({ message: '', type: 'ok', visible: false });
@@ -120,7 +117,7 @@ export default function Layout() {
   useEffect(() => {
     getDashboardStats()
       .then(d => {
-        setBadges({ inhand: d.inhand, onway: d.onway, prs: d.prs });
+        setBadges({ inhand: d.inhand, onway: d.onway });
         setAlerts({ d60: d.aging?.d60 || 0, d90: d.aging?.d90 || 0, thisMonth: d.this_month || 0, target: d.target || null });
       })
       .catch(() => {});
@@ -150,6 +147,7 @@ export default function Layout() {
   const behindPace = alerts.target?.profit_target > 0 &&
     (alerts.thisMonth / alerts.target.profit_target) * 100 < daysPct - 10;
   const critCount  = (alerts.d90 > 0 ? 1 : 0) + (alerts.d60 > 0 ? 1 : 0) + (behindPace ? 1 : 0);
+
 
   return (
     <div className={`layout-root ${collapsed ? 'sb-collapsed' : ''}`}>
@@ -310,17 +308,7 @@ export default function Layout() {
                     </div>
                   )}
 
-                  {badges.prs > 0 && (
-                    <div className="notif-item ni-info" onClick={() => { navigate('/pricerequests'); setNotifOpen(false); }}>
-                      <i className="fa fa-comments-dollar notif-item-icon" />
-                      <div className="notif-item-body">
-                        <strong>{badges.prs} price request{badges.prs > 1 ? 's' : ''}</strong>
-                        <span>Pending customer inquiries</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {critCount === 0 && badges.prs === 0 && (
+                  {critCount === 0 && (
                     <div className="notif-empty">
                       <i className="fa fa-circle-check" style={{ color: 'var(--g)', marginRight: 6 }} />
                       All clear — no alerts
@@ -349,7 +337,6 @@ export default function Layout() {
             <Route path="/lc"            element={<LCTracker         showToast={showToast} />} />
             <Route path="/taxreport"        element={<TaxManager        showToast={showToast} />} />
             <Route path="/businessexpenses" element={<BusinessExpenses  showToast={showToast} />} />
-            <Route path="/pricerequests" element={<PriceRequests showToast={showToast} />} />
             <Route path="/customers"     element={<CustomerDetails showToast={showToast} />} />
             <Route path="/documents"     element={<Documents     showToast={showToast} />} />
             <Route path="/users"         element={<Users         showToast={showToast} />} />
