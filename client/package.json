@@ -9,7 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "postbuild": "copy dist\\index.html dist\\404.html",
+    "postbuild": "node -e \"const fs=require('fs'); fs.copyFileSync('dist/index.html', 'dist/404.html')\"",
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
