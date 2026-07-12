@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Fernando Auto Dealers">
+  <rect width="64" height="64" rx="14" fill="#0f172a"/>
+  <path d="M18 20h28l-6 8H24l-6-8z" fill="#ef4444"/>
+  <path d="M20 28h24l-6 8H26l-6-8z" fill="#f59e0b"/>
+  <path d="M22 36h20l-4 8H26l-4-8z" fill="#22c55e"/>
+  <circle cx="32" cy="32" r="3" fill="#ffffff"/>
+</svg>
