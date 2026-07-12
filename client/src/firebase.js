@@ -1,4 +1,4 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -10,10 +10,10 @@ const firebaseConfig = {
   storageBucket: "fernando-auto-dealers.firebasestorage.app",
   messagingSenderId: "277282668411",
   appId: "1:277282668411:web:279a863e6eb6365dcbc7de",
-  measurementId: "G-5GQC8QQ55E"
+  measurementId: "G-5GQC8QQ55E",
 };
 
-const app = initializeApp(firebaseConfig);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
