@@ -20,12 +20,63 @@
     <title>Fernando Auto Dealers — Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=Work+Sans:wght@300;400;500;600&family=Dancing+Script:wght@500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <script type="module" crossorigin src="/fernandoautodealers/assets/index-DgpgrQGA.js"></script>
-    <link rel="stylesheet" crossorigin href="/fernandoautodealers/assets/index-Bfi2kfra.css">
+    <style>
+      /* Self-contained (no external CSS dependency) so it paints instantly on first load */
+      #initial-splash {
+        position: fixed; inset: 0; z-index: 999999;
+        background: #020202;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 22px;
+      }
+      #initial-splash img {
+        width: 170px; height: auto;
+        animation: initialSplashGlow 2.2s ease-in-out infinite;
+      }
+      @keyframes initialSplashGlow {
+        0%, 100% { filter: drop-shadow(0 0 8px rgba(229,57,53,.25)); transform: scale(1); }
+        50%      { filter: drop-shadow(0 0 22px rgba(229,57,53,.55)); transform: scale(1.03); }
+      }
+      #initial-splash .bar-track {
+        width: 220px; height: 3px; border-radius: 3px;
+        background: rgba(255,255,255,.08); overflow: hidden;
+      }
+      #initial-splash .bar-fill {
+        height: 100%; border-radius: 3px; width: 0%;
+        background: linear-gradient(90deg, #c62828, #e53935, #ef5350);
+        transition: width .15s ease-out;
+      }
+      #initial-splash .pct {
+        font-family: 'Josefin Sans', sans-serif;
+        font-size: .78rem; letter-spacing: 1px; color: #8a8a8a;
+        font-variant-numeric: tabular-nums;
+      }
+    </style>
+    <script type="module" crossorigin src="/fernandoautodealers/assets/index-DS1wsNMS.js"></script>
+    <link rel="stylesheet" crossorigin href="/fernandoautodealers/assets/index-CwkaM3_O.css">
   </head>
   <body>
-    <div id="root"></div>
+    <div id="initial-splash">
+      <img src="/fernandoautodealers/logo.png" alt="Fernando Auto Dealers" />
+      <div class="bar-track"><div class="bar-fill" id="initial-splash-fill"></div></div>
+      <div class="pct" id="initial-splash-pct">0%</div>
+    </div>
+    <div id="root"></div>
+    <script>
+      (function () {
+        var fill = document.getElementById('initial-splash-fill');
+        var pct  = document.getElementById('initial-splash-pct');
+        var start = performance.now();
+        function tick(now) {
+          var t = now - start;
+          var next = Math.min(96, Math.round(100 * (1 - Math.exp(-t / 600))));
+          if (fill) fill.style.width = next + '%';
+          if (pct)  pct.textContent = next + '%';
+          window.__initialSplashRaf = requestAnimationFrame(tick);
+        }
+        window.__initialSplashRaf = requestAnimationFrame(tick);
+      })();
+    </script>
   </body>
 </html>
